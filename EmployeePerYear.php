@@ -2,24 +2,51 @@
 	require('connect.php');
     include('header.php');
 
-    $agSales = "SELECT s.sp_month_id as id, s.num_sales as sales, DATE_FORMAT(m.end_date,'%M') as month
-	       									FROM salespermonth as s
-	       									INNER JOIN month as m
-	       									ON s.month_id = m.month_id
-	       									WHERE s.year_id = 26";
+	
+	if(@$_POST['years'] && @$_POST['years'] != 26){
+            $year = $_POST['years'];
+            $yearTitle = 1989+$year;
+            $yearTitle2 = 2015;
+            $agSales = $agSales = "SELECT  Concat(e.e_fname, ' ', e.e_lname) as emp, s.spe_year_id as id, s.num_sales as sales, YEAR(m.end_date) as month
+	       									FROM SPEYear as s
+											Inner Join employee as e
+											on e.emp_id = s.emp_id
+	       									INNER JOIN year as m
+	       									ON s.year_id = m.year_id
+	       									WHERE s.year_id = $year
+											order by sales desc";
+											
+											$agSales2 = "SELECT  Concat(e.e_fname, ' ', e.e_lname) as emp, s.spe_year_id as id, s.num_sales as sales, YEAR(m.end_date) as month
+	       									FROM SPEYear as s
+											Inner Join employee as e
+											on e.emp_id = s.emp_id
+	       									INNER JOIN year as m
+	       									ON s.year_id = m.year_id
+	       									WHERE s.year_id = 26 
+											order by sales desc";
 
-	$agSales2 = "SELECT s.sp_month_id as id, s.num_sales as sales, DATE_FORMAT(m.end_date,'%M') as month
-	       									FROM salespermonth as s
-	       									INNER JOIN month as m
-	       									ON s.month_id = m.month_id
-	       									WHERE s.year_id = 25";
-
-	$agSalesSorted = "SELECT s.sp_month_id as id, s.num_sales as sales, DATE_FORMAT(m.end_date,'%M') as month
-	       									FROM salespermonth as s
-	       									INNER JOIN month as m
-	       									ON s.month_id = m.month_id
+        } 
+		else {
+			$yearTitle = 2015;
+			$yearTitle2 = 2014;
+			 $agSales = "SELECT  Concat(e.e_fname, ' ', e.e_lname) as emp, s.spe_year_id as id, s.num_sales as sales, YEAR(m.end_date) as month
+	       									FROM SPEYear as s
+											Inner Join employee as e
+											on e.emp_id = s.emp_id
+	       									INNER JOIN year as m
+	       									ON s.year_id = m.year_id
 	       									WHERE s.year_id = 26
-	       									order by MONTH(m.end_date) Desc";
+											order by sales desc";
+											
+											$agSales2 = "SELECT  Concat(e.e_fname, ' ', e.e_lname) as emp, s.spe_year_id as id, s.num_sales as sales, YEAR(m.end_date) as month
+	       									FROM SPEYear as s
+											Inner Join employee as e
+											on e.emp_id = s.emp_id
+	       									INNER JOIN year as m
+	       									ON s.year_id = m.year_id
+	       									WHERE s.year_id = 25 
+											order by sales desc";
+		}
 
     $check = mysqli_query($connect, $agSales);
 	$rows = mysqli_num_rows($check);
@@ -31,20 +58,26 @@
    while($row = mysqli_fetch_assoc($check)){
    		$id = $row['id'];
    
-	$lblPHP[$count] = $row['month'];
+	$lblPHP[$count] = $row['emp'];
 	$salesPHP[$count] = $row['sales'];
 	$count++;
+
+	if($count == 10){
+		break;
+	}
 		}
 
 	$count = 0;
 	$sales2PHP = array();
+	$lbl2PHP =array();
 
 	$check = mysqli_query($connect, $agSales2);
 	$rows = mysqli_num_rows($check);
 
 	while($row = mysqli_fetch_assoc($check)){
    		$id = $row['id'];
-   
+
+	$lbl2PHP[$count] = $row['emp'];   	   
 	$sales2PHP[$count] = $row['sales'];
 	$count++;
 		}
@@ -84,6 +117,7 @@
 
 				var lblArr = <?php echo json_encode($lblPHP); ?>;
 				var salesArr = <?php echo json_encode($salesPHP); ?>;
+				var salesArr = <?php echo json_encode($salesPHP); ?>;
 				var sales2Arr = <?php echo json_encode($sales2PHP); ?>;
 				
 				
@@ -107,7 +141,7 @@
 						    labels: lblArr,
 						    datasets: [
 						       			 {
-							             label: "2015",
+							             label: "<?php echo $yearTitle;  ?>",
 							            fillColor: "rgba(11, 175, 230, 0.1)",
 							            strokeColor: "#0BAFE6",
 							            pointColor: "#0BAFE6",
@@ -117,7 +151,7 @@
 							            data: salesArr
 	       								 },
 								        {
-								            label: "2014",
+								            label: "<?php echo $yearTitle2;  ?>",
 								            fillColor: "rgba(255, 36, 61, 0.05)",
 								            strokeColor: "#FF243D",
 								            pointColor: "#FF243D",
@@ -129,7 +163,7 @@
 	       							  ]
 							};
 
-				var myLineChart = new Chart(ctx).Line(data,options);
+				var myLineChart = new Chart(ctx).Bar(data,options);
 
   document.getElementById("legend").innerHTML = myLineChart.generateLegend();
 
@@ -141,8 +175,7 @@
 				var salesArr = <?php echo json_encode($salesPHP); ?>;
 
 				options = {
-						    responsive: true,
-						    
+						    responsive: true
 						  };
 				var ctx = $("#myChart").get(0).getContext("2d");
 				var data = {
@@ -180,7 +213,42 @@
 	 <div class="row">
 
 		<div class="col-lg-8">
-			<h3>Sales Per Month</h3>
+			<h3>Top Selling Employees for <?php echo $yearTitle;  ?>
+
+</h3>
+			<form action="EmployeePerYear.php" method="POST" class="form-group form-inline" >
+					<select name="years" class="form-control" >
+						<option selected="Selected" disabled="true">Choose a Year</option>
+						<option value="26">2015</option>
+						<option value="25">2014</option>
+						<option value="24">2013</option>
+						<option value="23">2012</option>
+						<option value="22">2011</option>
+						<option value="21">2010</option>
+						<option value="20">2009</option>
+						<option value="19">2008</option>
+						<option value="18">2007</option>
+						<option value="17">2006</option>
+						<option value="16">2005</option>
+						<option value="15">2004</option>
+						<option value="14">2003</option>
+						<option value="13">2002</option>
+						<option value="12">2001</option>
+						<option value="11">2000</option>
+						<option value="10">1999</option>
+						<option value="9">1998</option>
+						<option value="8">1997</option>
+						<option value="7">1996</option>
+						<option value="6">1995</option>
+						<option value="5">1994</option>
+						<option value="4">1993</option>
+						<option value="3">1992</option>
+						<option value="2">1991</option>
+  						<option value="1">1990</option>
+					</select>
+					<input type="submit" class="btn btn-info">
+
+			</form>
 			<div class="col-md-6">
 			<button  class="btn btn-info" onclick="Bar();">2015</button>
 			</div>
@@ -193,16 +261,15 @@
 				<div id = "legend" ></div>
 				<canvas id="myChart2" width="720px" height="400px"></canvas>
 			</center>
-
-			<div class="col-md-6">
-		<form action="SalesPerQuarter.php">
-			<button class="btn btn-primary" type="submit">&lt; Quarterly</button>
+		<div class="col-md-6">
+		<form action="EployeePerMonth.php">
+			<button class="btn btn-primary" type="submit">&lt; Monthly</button>
 		</form>
 	</div>
 
 	<div class="col-md-6" style="text-align:right">
-		<form action="SalesPerYear.php">
-			<button class="btn btn-primary" type="submit">Yearly &gt;</button>
+		<form action="EmployeePerQuarter.php">
+			<button class="btn btn-primary" type="submit">Quarterly &gt;</button>
 		</form>
 	</div>
 		</div>
@@ -210,9 +277,10 @@
 		<div class="col-lg-4">
 			<table class="table table-striped table-responsive">
         	<thead>
-        		<th>Year</th>
-        		<th>2015 Sales</th>
-        		<th>2014 Sales</th>
+        		<th>Name</th>
+        		<th><?php echo $yearTitle;  ?> Sales</th>
+        		<th>Name</th>
+        		<th><?php echo $yearTitle2;  ?> Sales</th>
         	</thead>
         	<tbody>
       		<?php 
@@ -223,6 +291,7 @@
 	       	echo "<tr>";
 		       	echo "<td>".$lblPHP[$i]."</td>";
 				echo "<td>".$salesPHP[$i]."</td>";
+				echo "<td>".$lbl2PHP[$i]."</td>";
 				echo "<td>".$sales2PHP[$i]."</td>";
 	       	echo "</tr>";
 	       	
@@ -237,6 +306,21 @@
 
 	</div>
 
+
+	<div class="row">
+
+			<div class="col-lg-8">
+					
+				
+				<center>
+	</center>
+			</div>
+
+			<div class="col-lg-4">
+				
+			</div>
+
+	</div>
 
 </div> <!-- /container -->
 

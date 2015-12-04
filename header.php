@@ -28,8 +28,22 @@
                   <li><a href="SalesPerCustomerPerMonth.php">Per Month</a></li>
                 </ul>
             </li>  
-            <li><a href="#">Employees</a></li>
-            <li><a href="#">Branch</a></li>
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Employees<span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="EmployeePerYear.php">Per Year</a></li>
+                  <li><a href="EmployeePerQuarter.php">Per Quarter</a></li>
+                  <li><a href="EmployeePerMonth.php">Per Month</a></li>
+                </ul>
+            </li> 
+            <li class="dropdown">
+                <a href="#" class="dropdown-toggle" data-toggle="dropdown" role="button" aria-haspopup="true" aria-expanded="false">Branches <span class="caret"></span></a>
+                <ul class="dropdown-menu">
+                  <li><a href="SalesPerYearPerBranch.php">Per Year</a></li>
+                  <li><a href="#">Per Quarter</a></li>
+                  <li><a href="SalesPerMonthPerBranch.php">Per Month</a></li>
+                </ul>
+            </li>
             <li><a href="SPAge.php">Age Groups</a></li>
           </ul>
         </div>

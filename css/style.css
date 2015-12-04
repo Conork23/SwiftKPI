@@ -3,7 +3,20 @@ body{
 
 }
 
+.indexBtn{
+	padding:10px;
+}
 
+.indexBtn:hover{
+border-radius: 10px;
+background-color: #E3E7E8;
+}
+
+
+
+a:hover{
+	color:#00E8A6;
+}
 #legend{
 	color: #fff;
 	border-radius: 5px;

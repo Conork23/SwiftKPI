@@ -2,23 +2,23 @@
 	require('connect.php');
     include('header.php');
 
-    $agSales = "SELECT s.sp_month_id as id, s.num_sales as sales, DATE_FORMAT(m.end_date,'%M') as month
-	       									FROM salespermonth as s
-	       									INNER JOIN month as m
-	       									ON s.month_id = m.month_id
-	       									WHERE s.year_id = 26";
+    $agSales = "SELECT b.quater_id as id, b.num_sales as sales,DATE_FORMAT(m.start_date,'%M') as monthStart, DATE_FORMAT(m.end_date,'%M') as month
+	       									FROM spbquater as b
+	       									INNER JOIN quater as m
+	       									ON b.quater_id = m.quater_id
+	       									WHERE b.year_id = 25";
 
-	$agSales2 = "SELECT s.sp_month_id as id, s.num_sales as sales, DATE_FORMAT(m.end_date,'%M') as month
-	       									FROM salespermonth as s
-	       									INNER JOIN month as m
-	       									ON s.month_id = m.month_id
-	       									WHERE s.year_id = 25";
+	$agSales2 = "SELECT b.quater_id as id, b.num_sales as sales, DATE_FORMAT(m.end_date,'%M') as month
+	       									FROM spbquater as b
+	       									INNER JOIN quater as m
+	       									ON b.quater_id = m.quater_id
+	       									WHERE b.year_id = 24";
 
-	$agSalesSorted = "SELECT s.sp_month_id as id, s.num_sales as sales, DATE_FORMAT(m.end_date,'%M') as month
-	       									FROM salespermonth as s
-	       									INNER JOIN month as m
-	       									ON s.month_id = m.month_id
-	       									WHERE s.year_id = 26
+	$agSalesSorted = "SELECT b.quater_id as id, b.num_sales as sales, DATE_FORMAT(m.end_date,'%M') as month
+	       									FROM spbquater as b
+	       									INNER JOIN quater as m
+	       									ON b.quater_id = m.quater_id
+	       									WHERE b.quater_id = 25
 	       									order by MONTH(m.end_date) Desc";
 
     $check = mysqli_query($connect, $agSales);
@@ -31,7 +31,7 @@
    while($row = mysqli_fetch_assoc($check)){
    		$id = $row['id'];
    
-	$lblPHP[$count] = $row['month'];
+	$lblPHP[$count] = $row['monthStart']." - ".$row['month'];
 	$salesPHP[$count] = $row['sales'];
 	$count++;
 		}
@@ -83,6 +83,7 @@
     function LineChart(){
 
 				var lblArr = <?php echo json_encode($lblPHP); ?>;
+				var salesArr = <?php echo json_encode($salesPHP); ?>;
 				var salesArr = <?php echo json_encode($salesPHP); ?>;
 				var sales2Arr = <?php echo json_encode($sales2PHP); ?>;
 				
@@ -141,8 +142,7 @@
 				var salesArr = <?php echo json_encode($salesPHP); ?>;
 
 				options = {
-						    responsive: true,
-						    
+						    responsive: true
 						  };
 				var ctx = $("#myChart").get(0).getContext("2d");
 				var data = {
@@ -180,31 +180,16 @@
 	 <div class="row">
 
 		<div class="col-lg-8">
-			<h3>Sales Per Month</h3>
-			<div class="col-md-6">
-			<button  class="btn btn-info" onclick="Bar();">2015</button>
-			</div>
-			<div class="col-md-6" style="text-align:right">
-			<button  class="btn btn-info" onclick="Line();">Compare to 2014</button>
-			</div>
+			<h3>Sales Per Branch Per Quarter</h3>
+			<button  onclick="Bar();">2015</button>
+			<button  onclick="Line();">Compare</button>
+			
 			<center>
 				<canvas id="myChart" width="720px" height="400px"></canvas>
 				
 				<div id = "legend" ></div>
 				<canvas id="myChart2" width="720px" height="400px"></canvas>
 			</center>
-
-			<div class="col-md-6">
-		<form action="SalesPerQuarter.php">
-			<button class="btn btn-primary" type="submit">&lt; Quarterly</button>
-		</form>
-	</div>
-
-	<div class="col-md-6" style="text-align:right">
-		<form action="SalesPerYear.php">
-			<button class="btn btn-primary" type="submit">Yearly &gt;</button>
-		</form>
-	</div>
 		</div>
 
 		<div class="col-lg-4">
@@ -237,6 +222,21 @@
 
 	</div>
 
+
+	<div class="row">
+
+			<div class="col-lg-8">
+					
+				
+				<center>
+	</center>
+			</div>
+
+			<div class="col-lg-4">
+				
+			</div>
+
+	</div>
 
 </div> <!-- /container -->
 

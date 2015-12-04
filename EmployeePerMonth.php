@@ -2,24 +2,53 @@
 	require('connect.php');
     include('header.php');
 
-    $agSales = "SELECT s.sp_month_id as id, s.num_sales as sales, DATE_FORMAT(m.end_date,'%M') as month
-	       									FROM salespermonth as s
-	       									INNER JOIN month as m
-	       									ON s.month_id = m.month_id
-	       									WHERE s.year_id = 26";
 
-	$agSales2 = "SELECT s.sp_month_id as id, s.num_sales as sales, DATE_FORMAT(m.end_date,'%M') as month
-	       									FROM salespermonth as s
+			
+if(@$_POST['months']){
+            $month = $_POST['months'];
+            $monthName = date('F', mktime(0, 0, 0, $month, 10));
+            $agSales = "SELECT Concat(e.e_fname, ' ', e.e_lname) as name, s.spe_month_id as id, s.num_sales as sales, DATE_FORMAT(m.end_date,'%M') as month
+	       									FROM SPEMonth as s
 	       									INNER JOIN month as m
 	       									ON s.month_id = m.month_id
-	       									WHERE s.year_id = 25";
+	       									INNER JOIN employee as e
+	       									ON e.emp_id = s.emp_id
+	       									WHERE s.year_id = 26 and month(m.end_date) like $month
+	       									ORDER BY sales Desc";
+											
+			$agSales2 = "SELECT Concat(e.e_fname, ' ', e.e_lname) as name, s.spe_month_id as id, s.num_sales as sales, DATE_FORMAT(m.end_date,'%M') as month
+	       									FROM SPEMonth as s
+	       									INNER JOIN month as m
+	       									ON s.month_id = m.month_id
+	       									INNER JOIN employee as e
+	       									ON e.emp_id = s.emp_id
+	       									WHERE s.year_id = 25 and month(m.end_date) like $month
+	       									ORDER BY sales Desc";
+											
+			
 
-	$agSalesSorted = "SELECT s.sp_month_id as id, s.num_sales as sales, DATE_FORMAT(m.end_date,'%M') as month
-	       									FROM salespermonth as s
+        } 
+        else{
+        	$monthName = date('F', mktime(0, 0, 0, 1, 10));
+    $agSales = "SELECT Concat(e.e_fname, ' ', e.e_lname) as name, s.spe_month_id as id, s.num_sales as sales, DATE_FORMAT(m.end_date,'%M') as month
+	       									FROM SPEMonth as s
 	       									INNER JOIN month as m
 	       									ON s.month_id = m.month_id
-	       									WHERE s.year_id = 26
-	       									order by MONTH(m.end_date) Desc";
+	       									INNER JOIN employee as e
+	       									ON e.emp_id = s.emp_id
+	       									WHERE s.year_id = 26 and month(m.end_date) like 1 
+	       									ORDER BY sales Desc";
+											
+	$agSales2 = "SELECT Concat(e.e_fname, ' ', e.e_lname) as name, s.spe_month_id as id, s.num_sales as sales, DATE_FORMAT(m.end_date,'%M') as month
+	       									FROM SPEMonth as s
+	       									INNER JOIN month as m
+	       									ON s.month_id = m.month_id
+	       									INNER JOIN employee as e
+	       									ON e.emp_id = s.emp_id
+	       									WHERE s.year_id = 25 and month(m.end_date) like 1 
+	       									ORDER BY sales Desc";
+}
+
 
     $check = mysqli_query($connect, $agSales);
 	$rows = mysqli_num_rows($check);
@@ -31,13 +60,18 @@
    while($row = mysqli_fetch_assoc($check)){
    		$id = $row['id'];
    
-	$lblPHP[$count] = $row['month'];
+	$lblPHP[$count] = $row['name'];
 	$salesPHP[$count] = $row['sales'];
 	$count++;
+
+	if($count == 10){
+		break;
+	}
 		}
 
 	$count = 0;
 	$sales2PHP = array();
+	$lbl2PHP = array();
 
 	$check = mysqli_query($connect, $agSales2);
 	$rows = mysqli_num_rows($check);
@@ -45,6 +79,7 @@
 	while($row = mysqli_fetch_assoc($check)){
    		$id = $row['id'];
    
+    $lbl2PHP[$count] = $row['name'];
 	$sales2PHP[$count] = $row['sales'];
 	$count++;
 		}
@@ -83,6 +118,7 @@
     function LineChart(){
 
 				var lblArr = <?php echo json_encode($lblPHP); ?>;
+				var salesArr = <?php echo json_encode($salesPHP); ?>;
 				var salesArr = <?php echo json_encode($salesPHP); ?>;
 				var sales2Arr = <?php echo json_encode($sales2PHP); ?>;
 				
@@ -129,7 +165,7 @@
 	       							  ]
 							};
 
-				var myLineChart = new Chart(ctx).Line(data,options);
+				var myLineChart = new Chart(ctx).Bar(data,options);
 
   document.getElementById("legend").innerHTML = myLineChart.generateLegend();
 
@@ -141,8 +177,7 @@
 				var salesArr = <?php echo json_encode($salesPHP); ?>;
 
 				options = {
-						    responsive: true,
-						    
+						    responsive: true
 						  };
 				var ctx = $("#myChart").get(0).getContext("2d");
 				var data = {
@@ -180,7 +215,31 @@
 	 <div class="row">
 
 		<div class="col-lg-8">
-			<h3>Sales Per Month</h3>
+			<h3>Top Selling Employees for <?php
+			
+			echo $monthName;
+			?>
+
+</h3>
+			<form action="EmployeePerMonth.php" method="POST" class="form-group form-inline" >
+					<select name="months" class="form-control" >
+						<option selected="Selected" disabled="true">Choose a Month</option>
+  						<option value="1">January</option>
+						<option value="2">February</option>
+						<option value="3">March</option>
+						<option value="4">April</option>
+						<option value="5">May</option>
+						<option value="6">June</option>
+						<option value="7">July</option>
+						<option value="8">August</option>
+						<option value="9">September</option>
+						<option value="10">October</option>
+						<option value="11">Novermber</option>
+						<option value="12">December</option>
+					</select>
+					<input type="submit" class="btn btn-info">
+
+			</form>
 			<div class="col-md-6">
 			<button  class="btn btn-info" onclick="Bar();">2015</button>
 			</div>
@@ -195,23 +254,25 @@
 			</center>
 
 			<div class="col-md-6">
-		<form action="SalesPerQuarter.php">
+		<form action="EmployeePerQuarter.php">
 			<button class="btn btn-primary" type="submit">&lt; Quarterly</button>
 		</form>
 	</div>
 
 	<div class="col-md-6" style="text-align:right">
-		<form action="SalesPerYear.php">
+		<form action="EmployeePerYear.php">
 			<button class="btn btn-primary" type="submit">Yearly &gt;</button>
 		</form>
 	</div>
+		
 		</div>
 
 		<div class="col-lg-4">
-			<table class="table table-striped table-responsive">
+				<table class="table table-striped table-responsive">
         	<thead>
-        		<th>Year</th>
+        		<th>Name</th>
         		<th>2015 Sales</th>
+        		<th>Name</th>
         		<th>2014 Sales</th>
         	</thead>
         	<tbody>
@@ -223,6 +284,7 @@
 	       	echo "<tr>";
 		       	echo "<td>".$lblPHP[$i]."</td>";
 				echo "<td>".$salesPHP[$i]."</td>";
+				echo "<td>".$lbl2PHP[$i]."</td>";
 				echo "<td>".$sales2PHP[$i]."</td>";
 	       	echo "</tr>";
 	       	
@@ -237,6 +299,21 @@
 
 	</div>
 
+
+	<div class="row">
+
+			<div class="col-lg-8">
+					
+				
+				<center>
+	</center>
+			</div>
+
+			<div class="col-lg-4">
+				
+			</div>
+
+	</div>
 
 </div> <!-- /container -->
 

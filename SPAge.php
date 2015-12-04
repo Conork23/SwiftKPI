@@ -35,6 +35,8 @@
     <link href="css/bootstrap.min.css" rel="stylesheet">
     <!-- jQuery -->
     <script src="js/jquery-2.1.4.js"></script>
+        <link href="css/style.css" rel="stylesheet">
+
     <!--Chart.js-->
     <script src="js/Chart.js">
 	
@@ -161,7 +163,7 @@
         value: salesArr[14],
         color:'#F7464A',
         highlight: '#24FF41',
-        label: lblArr[41]
+        label: lblArr[14]
     }
 ]
 

@@ -47,13 +47,6 @@ if(@$_POST['months']){
 }
 	
 
-	$agSalesSorted = "SELECT s.sp_month_id as id, s.num_sales as sales, DATE_FORMAT(m.end_date,'%M') as month
-	       									FROM salespermonth as s
-	       									INNER JOIN month as m
-	       									ON s.month_id = m.month_id
-	       									WHERE s.year_id = 26
-	       									order by MONTH(m.end_date) Desc";
-
     $check = mysqli_query($connect, $agSales);
 	$rows = mysqli_num_rows($check);
 
